@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# PyInstaller
+dist/
+build/
+
+# Virtual environment
+venv/
+env/
+
+# Logs
+*.log
+
+# .env files
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store  # macOS
+Thumbs.db  # Windows
+ehthumbs.db  # Windows
