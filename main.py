@@ -1,5 +1,6 @@
+import io
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 import csv
 import uuid
 from io import StringIO
@@ -136,6 +137,28 @@ async def get_status(request_id: str):
             "total_requests": total_entries,
             "completion_percentage": completion_percentage if completed_entries > 0 else 0
         }
+    
+    finally:
+        db.close()
+
+@app.get("/export/{request_id}")
+async def export_csv(request_id: str):
+    db = SessionLocal()
+    try:
+        products = db.query(Product).filter(Product.request_id == request_id).all()
+
+        if not products:
+            raise HTTPException(status_code=404, detail="Request ID not found or no products available.")
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Serial Number", "Product Name", "Input Image URLs", "Output Image URLs"])
+
+        for product in products:
+            writer.writerow([product.serial_number, product.product_name, product.input_image_urls, product.output_image_urls])
+
+        output.seek(0)
+        return StreamingResponse(output, media_type="text/csv", headers={"Content-Disposition": f"attachment; filename=request_{request_id}.csv"})
     
     finally:
         db.close()
